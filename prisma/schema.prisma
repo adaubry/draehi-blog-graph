@@ -1,0 +1,53 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model SavedHistory {
+  id          Int      @id @default(autoincrement())
+  searchValue String
+  results     Results? @relation(fields: [resultsId], references: [id])
+  resultsId   Int?     @unique  // Added @unique here
+}
+
+model Results {
+  id           Int           @id @default(autoincrement())
+  savedHistory SavedHistory?
+  nodes        Node[]        @relation("ResultsNodes")
+  edges        Edge[]        @relation("ResultsEdges")
+}
+
+model Node {
+  id         Int      @id @default(autoincrement())
+  label      String
+  deletable  Boolean
+  draggable  Boolean
+  positionX  Float
+  positionY  Float
+  selectable Boolean
+  background String
+  color      String
+  results    Results? @relation("ResultsNodes", fields: [resultsId], references: [id])
+  resultsId  Int?
+}
+
+model Edge {
+  id        Int      @id @default(autoincrement())
+  label     String
+  sourceId  Int
+  targetId  Int
+  stroke    String
+  type      String
+  results   Results? @relation("ResultsEdges", fields: [resultsId], references: [id])
+  resultsId Int?
+}
